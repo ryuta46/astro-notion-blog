@@ -148,6 +148,13 @@ export async function getAllCategories(): Promise<Category[]> {
         equals: true,
       },
     },
+    sorts: [
+      {
+        property: 'Rank',
+        direction: 'ascending',
+      },
+    ],
+
     page_size: 100,
   }
 
@@ -1035,6 +1042,13 @@ function _buildPost(pageObject: responses.PageObject): Post {
     }
   }
 
+  let categoryId: string | null = null
+  if (prop.Category.relation) {
+    if (prop.Category.relation[0] && prop.Category.relation[0].id && prop.Category.relation[0].id.length > 0) {
+      categoryId = prop.Category.relation[0].id
+    }
+  }
+
   const post: Post = {
     PageId: pageObject.id,
     Title: prop.Page.title
@@ -1053,6 +1067,7 @@ function _buildPost(pageObject: responses.PageObject): Post {
         : '',
     FeaturedImage: featuredImage,
     Rank: prop.Rank.number ? prop.Rank.number : 0,
+    CategoryId: categoryId
   }
 
   return post
