@@ -7,9 +7,10 @@ import ExifTransformer from 'exif-be-gone'
 import {
   NOTION_API_SECRET,
   DATABASE_ID,
+  CATEGORY_DATABASE_ID,
   NUMBER_OF_POSTS_PER_PAGE,
   REQUEST_TIMEOUT_MS,
-} from '../../server-constants'
+} from '../../server-constants';
 import type * as responses from './responses'
 import type * as requestParams from './request-params'
 import type {
@@ -50,8 +51,8 @@ import type {
   FileObject,
   LinkToPage,
   Mention,
-  Reference,
-} from '../interfaces'
+  Reference, Category,
+} from '../interfaces';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 import { Client, APIResponseError } from '@notionhq/client'
 
@@ -60,6 +61,7 @@ const client = new Client({
 })
 
 let postsCache: Post[] | null = null
+let categoriesCache: Category[] | null = null
 let dbCache: Database | null = null
 
 const numberOfRetry = 2
@@ -132,6 +134,60 @@ export async function getAllPosts(): Promise<Post[]> {
     .map((pageObject) => _buildPost(pageObject))
   return postsCache
 }
+
+export async function getAllCategories(): Promise<Category[]> {
+  if (categoriesCache !== null) {
+    return Promise.resolve(categoriesCache)
+  }
+
+  const params: requestParams.QueryDatabase = {
+    database_id: CATEGORY_DATABASE_ID,
+    filter: {
+      property: 'Published',
+      checkbox: {
+        equals: true,
+      },
+    },
+    page_size: 100,
+  }
+
+  let results: responses.PageObject[] = []
+  while (true) {
+    const res = await retry(
+      async (bail) => {
+        try {
+          return (await client.databases.query(
+            params as any // eslint-disable-line @typescript-eslint/no-explicit-any
+          )) as responses.QueryDatabaseResponse
+        } catch (error: unknown) {
+          if (error instanceof APIResponseError) {
+            if (error.status && error.status >= 400 && error.status < 500) {
+              bail(error)
+            }
+          }
+          throw error
+        }
+      },
+      {
+        retries: numberOfRetry,
+      }
+    )
+
+    results = results.concat(res.results)
+
+    if (!res.has_more) {
+      break
+    }
+
+    params['start_cursor'] = res.next_cursor as string
+  }
+
+  categoriesCache = results
+    .filter((pageObject) => _validCategoryObject(pageObject))
+    .map((pageObject) => _buildCategory(pageObject))
+  return categoriesCache
+}
+
 
 export async function getPosts(pageSize = 10): Promise<Post[]> {
   const allPosts = await getAllPosts()
@@ -925,6 +981,15 @@ function _validPageObject(pageObject: responses.PageObject): boolean {
   )
 }
 
+function _validCategoryObject(pageObject: responses.PageObject): boolean {
+  const prop = pageObject.properties
+  return (
+    !!prop.Page.title &&
+    prop.Page.title.length > 0
+  )
+}
+
+
 function _buildPost(pageObject: responses.PageObject): Post {
   const prop = pageObject.properties
 
@@ -992,6 +1057,20 @@ function _buildPost(pageObject: responses.PageObject): Post {
 
   return post
 }
+
+function _buildCategory(pageObject: responses.PageObject): Post {
+  const prop = pageObject.properties
+
+  const category: Category = {
+    PageId: pageObject.id,
+    Title: prop.Page.title
+      ? prop.Page.title.map((richText) => richText.plain_text).join('')
+      : '',
+  }
+
+  return category
+}
+
 
 function _buildRichText(richTextObject: responses.RichTextObject): RichText {
   const annotation: Annotation = {

@@ -18,6 +18,12 @@ export interface Post {
   Rank: number
 }
 
+export interface Category {
+  PageId: string
+  Title: string
+}
+
+
 export interface Block {
   Id: string
   Type: string

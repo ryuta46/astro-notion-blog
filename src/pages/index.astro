@@ -5,6 +5,7 @@ import {
   getRankedPosts,
   getAllTags,
   getNumberOfPages,
+  getAllCategories,
 } from '../lib/notion/client.ts'
 import Layout from '../layouts/Layout.astro'
 import NoContents from '../components/NoContents.astro'
@@ -19,11 +20,12 @@ import BlogPostsLink from '../components/BlogPostsLink.astro'
 import BlogTagsLink from '../components/BlogTagsLink.astro'
 import styles from '../styles/blog.module.css'
 
-const [posts, rankedPosts, tags, numberOfPages] = await Promise.all([
+const [posts, rankedPosts, tags, numberOfPages, categories] = await Promise.all([
   getPosts(NUMBER_OF_POSTS_PER_PAGE),
   getRankedPosts(),
   getAllTags(),
   getNumberOfPages(),
+  getAllCategories(),
 ])
 ---
 
@@ -52,7 +54,12 @@ const [posts, rankedPosts, tags, numberOfPages] = await Promise.all([
   </div>
 
   <div slot="aside" class={styles.aside}>
-    <BlogPostsLink heading="Recommended" posts={rankedPosts} />
-    <BlogTagsLink heading="Categories" tags={tags} />
+    {
+      categories.map((category) => (
+        <BlogPostsLink heading={category.Title} posts={rankedPosts} />
+      ))
+    }
+    <!-- <BlogPostsLink heading="Recommended" posts={rankedPosts} />-->
+    <!-- <BlogTagsLink heading="Categories" tags={tags} /> -->
   </div>
 </Layout>
