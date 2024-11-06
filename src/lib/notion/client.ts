@@ -70,6 +70,7 @@ export async function getAllPosts(): Promise<Post[]> {
   if (postsCache !== null) {
     return Promise.resolve(postsCache)
   }
+  const categories = await getAllCategories()
 
   const params: requestParams.QueryDatabase = {
     database_id: DATABASE_ID,
@@ -132,6 +133,13 @@ export async function getAllPosts(): Promise<Post[]> {
   postsCache = results
     .filter((pageObject) => _validPageObject(pageObject))
     .map((pageObject) => _buildPost(pageObject))
+    .sort((l, r) => {
+      if (l.CategoryId === r.CategoryId || l.CategoryId === null || r.CategoryId === null) {
+        return l.Rank - r.Rank
+      } else {
+        return categories.findIndex((category) => category.PageId === l.CategoryId) - categories.findIndex((category) => category.PageId === r.CategoryId)
+      }
+    })
   return postsCache
 }
 
@@ -1073,7 +1081,7 @@ function _buildPost(pageObject: responses.PageObject): Post {
   return post
 }
 
-function _buildCategory(pageObject: responses.PageObject): Post {
+function _buildCategory(pageObject: responses.PageObject): Category {
   const prop = pageObject.properties
 
   const category: Category = {
