@@ -22,6 +22,8 @@ export interface Post {
 export interface Category {
   PageId: string
   Title: string
+  Slug: string
+  Excerpt: string
 }
 
 

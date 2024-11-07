@@ -1,0 +1,25 @@
+---
+import { Category } from '../lib/interfaces.ts'
+
+export interface Props {
+  category: Category
+}
+
+const { category } = Astro.props
+---
+
+<div class="category-title">
+  <p>{category.Title ? category.Title : ''}</p>
+</div>
+
+<style>
+  .category-title {
+    padding: 0.0rem 0;
+  }
+
+  .category-title p {
+    margin: 0;
+    font-size: 2.5rem;
+    font-weight: bold;
+  }
+</style>

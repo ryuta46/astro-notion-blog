@@ -1,0 +1,24 @@
+---
+import { Category } from '../lib/interfaces.ts'
+
+export interface Props {
+  category: Category
+}
+
+const { category } = Astro.props
+---
+
+<div class="category-excerpt">
+  <p>{category.Excerpt ? category.Excerpt : ''}</p>
+</div>
+
+<style>
+  .category-excerpt {
+    padding: 2.0rem 0;
+  }
+
+  .category-excerpt p {
+    margin: 0;
+    font-size: 1.2rem;
+  }
+</style>

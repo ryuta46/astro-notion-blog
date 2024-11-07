@@ -246,6 +246,20 @@ export async function getPostsByTag(
     .slice(0, pageSize)
 }
 
+export async function getPostsByCategorySlug(
+  categorySlug: string,
+): Promise<Post[]> {
+  if (!categorySlug) return []
+
+  const allPosts = await getAllPosts()
+  const allCategories = await getAllCategories()
+  const category = allCategories.find((category) => category.Slug == categorySlug)
+  if (!category) return []
+  return allPosts
+    .filter((post) => post.CategoryId === category.PageId)
+}
+
+
 // page starts from 1 not 0
 export async function getPostsByPage(page: number): Promise<Post[]> {
   if (page < 1) {
@@ -1089,6 +1103,13 @@ function _buildCategory(pageObject: responses.PageObject): Category {
     Title: prop.Page.title
       ? prop.Page.title.map((richText) => richText.plain_text).join('')
       : '',
+    Slug: prop.Slug.rich_text
+      ? prop.Slug.rich_text.map((richText) => richText.plain_text).join('')
+      : '',
+    Excerpt:
+      prop.Excerpt.rich_text && prop.Excerpt.rich_text.length > 0
+        ? prop.Excerpt.rich_text.map((richText) => richText.plain_text).join('')
+        : '',
   }
 
   return category
