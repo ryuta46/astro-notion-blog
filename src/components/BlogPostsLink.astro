@@ -5,14 +5,15 @@ import NoContents from './NoContents.astro'
 
 export interface Props {
   heading: string
+  headingUrl: string
   posts: Post[]
 }
 
-const { heading, posts } = Astro.props
+const { heading, headingUrl, posts } = Astro.props
 ---
 
 <div class="blog-posts-link">
-  <h2>{heading}</h2>
+  <h2><a href={headingUrl}>{heading}</a></h2>
   {
     posts.length === 0 ? (
       <NoContents contents={posts} />

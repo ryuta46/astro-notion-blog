@@ -4,6 +4,7 @@ import styles from '../styles/blog.module.css'
 import { getAllCategories, getAllPosts } from '../lib/notion/client';
 import { NUMBER_OF_POSTS_PER_PAGE } from '../server-constants';
 import BlogPostsLink from './BlogPostsLink.astro';
+import { getCategoryLink } from '../lib/blog-helpers';
 
 const [posts, categories] = await Promise.all([
   getAllPosts(),
@@ -15,7 +16,7 @@ const [posts, categories] = await Promise.all([
   <div slot="aside" class={styles.aside}>
     {
       categories.map((category) => (
-        <BlogPostsLink heading={category.Title} posts={
+        <BlogPostsLink heading={category.Title} headingUrl={getCategoryLink(category.Slug)} posts={
           posts
             .filter(post => post.CategoryId === category.PageId)
             .sort((l, r) =>  l.Rank - r.Rank)
