@@ -10,11 +10,22 @@ import {
 import Layout from '../layouts/Layout.astro'
 import styles from '../styles/blog.module.css'
 import Categories from '../components/Categories.astro';
+import { getDatabase } from '../lib/notion/client';
 
+const database = await getDatabase()
 ---
 
 <Layout>
   <div slot="main" class={styles.main}>
+    <header>
+      <h1>
+        {database.Title}
+      </h1>
+      <div class="description">
+        {database.Description}
+      </div>
+    </header>
+
     <Categories />
   </div>
 
