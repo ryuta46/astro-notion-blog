@@ -82,20 +82,8 @@ export async function getAllPosts(): Promise<Post[]> {
             equals: true,
           },
         },
-        {
-          property: 'Date',
-          date: {
-            on_or_before: new Date().toISOString(),
-          },
-        },
       ],
     },
-    sorts: [
-      {
-        property: 'Date',
-        direction: 'descending',
-      },
-    ],
     page_size: 100,
   }
 
@@ -1005,8 +993,7 @@ function _validPageObject(pageObject: responses.PageObject): boolean {
     !!prop.Page.title &&
     prop.Page.title.length > 0 &&
     !!prop.Slug.rich_text &&
-    prop.Slug.rich_text.length > 0 &&
-    !!prop.Date.date
+    prop.Slug.rich_text.length > 0
   )
 }
 
