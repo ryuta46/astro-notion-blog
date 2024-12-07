@@ -41,4 +41,8 @@ export default defineConfig({
     FeaturedImageDownloader(),
     PublicNotionCopier(),
   ],
+  i18n: {
+    defaultLocale: "en",
+    locales: ["en", "ja"],
+  },
 });

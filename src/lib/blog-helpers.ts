@@ -129,12 +129,12 @@ export const getNavLink = (nav: string) => {
   return pathJoin(BASE_PATH, nav)
 }
 
-export const getPostLink = (slug: string) => {
-  return pathJoin(BASE_PATH, `/posts/${slug}`)
+export const getPostLink = (language: string, slug: string) => {
+  return pathJoin(BASE_PATH, `/${language}/posts/${slug}`)
 }
 
-export const getCategoryLink = (slug: string) => {
-  return pathJoin(BASE_PATH, `/categories/${slug}`)
+export const getCategoryLink = (language: string, slug: string) => {
+  return pathJoin(BASE_PATH, `/${language}/categories/${slug}`)
 }
 
 

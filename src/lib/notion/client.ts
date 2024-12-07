@@ -1,6 +1,6 @@
 import fs, { createWriteStream } from 'node:fs'
 import { pipeline } from 'node:stream/promises'
-import axios, { AxiosResponse } from 'axios'
+import axios, { type AxiosResponse } from 'axios';
 import sharp from 'sharp'
 import retry from 'async-retry'
 import ExifTransformer from 'exif-be-gone'
@@ -120,7 +120,15 @@ export async function getAllPosts(): Promise<Post[]> {
 
   postsCache = results
     .filter((pageObject) => _validPageObject(pageObject))
-    .map((pageObject) => _buildPost(pageObject))
+    .map((pageObject) => {
+      //
+      const post = _buildPost(pageObject)
+      const category = categories.find((category) => category.PageId === post.CategoryId)
+      if (category) {
+        post.Language = category.Language;
+      }
+      return post;
+    })
     .sort((l, r) => {
       if (l.CategoryId === r.CategoryId || l.CategoryId === null || r.CategoryId === null) {
         return l.Rank - r.Rank
@@ -235,13 +243,14 @@ export async function getPostsByTag(
 }
 
 export async function getPostsByCategorySlug(
+  language: string,
   categorySlug: string,
 ): Promise<Post[]> {
   if (!categorySlug) return []
 
   const allPosts = await getAllPosts()
   const allCategories = await getAllCategories()
-  const category = allCategories.find((category) => category.Slug == categorySlug)
+  const category = allCategories.find((category) => category.Language === language && category.Slug == categorySlug)
   if (!category) return []
   return allPosts
     .filter((post) => post.CategoryId === category.PageId)
@@ -1076,7 +1085,8 @@ function _buildPost(pageObject: responses.PageObject): Post {
         : '',
     FeaturedImage: featuredImage,
     Rank: prop.Rank.number ? prop.Rank.number : 0,
-    CategoryId: categoryId
+    CategoryId: categoryId,
+    Language: ''
   }
 
   return post
@@ -1097,6 +1107,7 @@ function _buildCategory(pageObject: responses.PageObject): Category {
       prop.Excerpt.rich_text && prop.Excerpt.rich_text.length > 0
         ? prop.Excerpt.rich_text.map((richText) => richText.plain_text).join('')
         : '',
+    Language: prop.Language.select?.name ?? '',
   }
 
   return category

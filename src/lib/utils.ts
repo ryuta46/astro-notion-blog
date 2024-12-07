@@ -8,3 +8,7 @@ export const pathJoin = (path: string, subPath: string) => {
       .join('/')
   )
 }
+
+export const getAllLanguages = () => {
+  return ["en", "ja"];
+}

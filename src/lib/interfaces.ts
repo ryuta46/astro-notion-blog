@@ -17,6 +17,7 @@ export interface Post {
   FeaturedImage: FileObject | null
   Rank: number
   CategoryId: string | null
+  Language: string
 }
 
 export interface Category {
@@ -24,6 +25,7 @@ export interface Category {
   Title: string
   Slug: string
   Excerpt: string
+  Language: string
 }
 
 

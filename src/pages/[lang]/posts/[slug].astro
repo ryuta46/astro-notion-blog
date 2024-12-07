@@ -1,5 +1,5 @@
 ---
-import * as interfaces from '../../lib/interfaces.ts'
+import * as interfaces from '../../../lib/interfaces.ts'
 import {
   getPosts,
   getAllPosts,
@@ -10,29 +10,38 @@ import {
   getAllTags,
   getAllBlocksByBlockId,
   downloadFile,
-} from '../../lib/notion/client.ts'
+} from '../../../lib/notion/client.ts'
 import {
   getPostLink,
   filePath,
   extractTargetBlocks,
-} from '../../lib/blog-helpers.ts'
-import Layout from '../../layouts/Layout.astro'
-import PostDate from '../../components/PostDate.astro'
-import PostTags from '../../components/PostTags.astro'
-import PostTitle from '../../components/PostTitle.astro'
-import PostBody from '../../components/PostBody.astro'
-import PostRelativeLink from '../../components/PostRelativeLink.astro'
-import BlogPostsLink from '../../components/BlogPostsLink.astro'
-import BlogTagsLink from '../../components/BlogTagsLink.astro'
-import styles from '../../styles/blog.module.css'
-import Categories from '../../components/Categories.astro';
+} from '../../../lib/blog-helpers.ts'
+import Layout from '../../../layouts/Layout.astro'
+import PostTitle from '../../../components/PostTitle.astro'
+import PostBody from '../../../components/PostBody.astro'
+import PostRelativeLink from '../../../components/PostRelativeLink.astro'
+import styles from '../../../styles/blog.module.css'
+import Categories from '../../../components/Categories.astro';
+import { getAllLanguages } from '../../../lib/utils';
 
 export async function getStaticPaths() {
-  const posts = await getAllPosts()
-  return posts.map((post: interfaces.Post) => ({ params: { slug: post.Slug } }))
+  const allLanguages = getAllLanguages();
+  const posts = await getAllPosts();
+  return allLanguages.flatMap((language) => (
+    posts
+      .filter((post: interfaces.Post) => post.Language === language)
+      .map((post: interfaces.Post) => (
+        {
+          params: {
+            lang: language,
+            slug: post.Slug
+          }
+        }
+      ))
+  ))
 }
 
-const { slug } = Astro.params
+const { slug, lang } = Astro.params
 
 const post = await getPostBySlug(slug)
 if (!post) {
@@ -84,9 +93,10 @@ await Promise.all(
     .map((promise) => promise.then(downloadFile))
 )
 
-const currentPostIndex = allPosts.findIndex((post) => post.Slug === slug)
-const prevPost = allPosts[currentPostIndex - 1]
-const nextPost = allPosts[currentPostIndex + 1]
+const sameLanguagePosts = allPosts.filter((post) => post.Language === lang)
+const currentPostIndex = sameLanguagePosts.findIndex((post) => post.Slug === slug)
+const prevPost = sameLanguagePosts[currentPostIndex - 1]
+const nextPost = sameLanguagePosts[currentPostIndex + 1]
 
 let ogImage = ''
 if (post.FeaturedImage && post.FeaturedImage.Url) {
@@ -97,7 +107,7 @@ if (post.FeaturedImage && post.FeaturedImage.Url) {
 <Layout
   title={post.Title}
   description={post.Excerpt}
-  path={getPostLink(post.Slug)}
+  path={getPostLink(post.Language, post.Slug)}
   ogImage={ogImage}
 >
   <div slot="main" class={styles.main}>
@@ -112,6 +122,6 @@ if (post.FeaturedImage && post.FeaturedImage.Url) {
   </div>
 
   <div slot="aside" class="aside">
-    <Categories />
+    <Categories language={lang}/>
   </div>
 </Layout>

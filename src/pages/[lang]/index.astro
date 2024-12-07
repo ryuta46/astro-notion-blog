@@ -1,0 +1,41 @@
+---
+import Layout from '../../layouts/Layout.astro'
+import styles from '../../styles/blog.module.css'
+import Categories from '../../components/Categories.astro';
+import { getDatabase } from '../../lib/notion/client';
+import { getAllLanguages } from '../../lib/utils';
+
+export async function getStaticPaths() {
+  const allLanguages = getAllLanguages();
+  return allLanguages.map((language) => (
+    {
+      params: {
+        lang: language,
+      }
+    }
+  ))
+}
+
+const { lang } = Astro.params
+
+const database = await getDatabase()
+---
+
+<Layout>
+  <div slot="main" class={styles.main}>
+    <header>
+      <h1>
+        {database.Title}
+      </h1>
+      <div class="description">
+        {database.Description}
+      </div>
+    </header>
+
+    <Categories language={lang}/>
+  </div>
+
+  <div slot="aside" class={styles.aside}>
+    <Categories language={lang}/>
+  </div>
+</Layout>

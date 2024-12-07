@@ -22,7 +22,7 @@ const { heading, headingUrl, posts } = Astro.props
         {posts.map((post: Post) => (
           <li>
             <a
-              href={getPostLink(post.Slug)}
+              href={getPostLink(post.Language, post.Slug)}
               title={`${post.Icon?.Emoji || ''}${post.Title}`}
             >
               {post.Icon && post.Icon.Type === 'emoji' ? (
