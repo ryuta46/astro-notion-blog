@@ -8,7 +8,6 @@ const { language } = Astro.props
 
 import styles from '../styles/blog.module.css'
 import { getAllCategories, getAllPosts } from '../lib/notion/client';
-import { NUMBER_OF_POSTS_PER_PAGE } from '../server-constants';
 import BlogPostsLink from './BlogPostsLink.astro';
 import { getCategoryLink } from '../lib/blog-helpers';
 
@@ -24,7 +23,7 @@ const [posts, categories] = await Promise.all([
       categories
         .filter((category) => category.Language === language)
         .map((category) => (
-        <BlogPostsLink heading={category.Title} headingUrl={getCategoryLink(category.Slug)} posts={
+        <BlogPostsLink heading={category.Title} headingUrl={getCategoryLink(category.Language, category.Slug)} posts={
           posts
             .filter(post => post.CategoryId === category.PageId)
             .sort((l, r) =>  l.Rank - r.Rank)
