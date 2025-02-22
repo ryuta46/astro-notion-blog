@@ -220,9 +220,13 @@ export async function getRankedPosts(pageSize = 10): Promise<Post[]> {
     .slice(0, pageSize)
 }
 
-export async function getPostBySlug(slug: string): Promise<Post | null> {
+export async function getPostBySlug(
+  language: string,
+  slug: string
+): Promise<Post | null> {
   const allPosts = await getAllPosts()
-  return allPosts.find((post) => post.Slug === slug) || null
+
+  return allPosts.find((post) => post.Language == language && post.Slug === slug) || null
 }
 
 export async function getPostByPageId(pageId: string): Promise<Post | null> {
