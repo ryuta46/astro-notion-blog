@@ -2,6 +2,7 @@
 import * as interfaces from '../../lib/interfaces.ts'
 import { isYouTubeURL, parseYouTubeVideoId } from '../../lib/blog-helpers.ts'
 import Caption from './Caption.astro'
+import { filePath } from '../../lib/blog-helpers';
 
 export interface Props {
   block: interfaces.Block
@@ -9,9 +10,14 @@ export interface Props {
 
 const { block } = Astro.props
 
-let url: URL
+let video: string
+let url: URL | null = null
 try {
-  url = new URL(block.Video.External?.Url)
+  if (block.Video.External) {
+    url = new URL(block.Video.External.Url)
+  } else if (block.Video.File) {
+    video = filePath(new URL(block.Video.File.Url))
+  }
 } catch (err) {
   console.log(err)
 }
@@ -20,7 +26,7 @@ try {
 <div class="video">
   <div>
     {
-      isYouTubeURL(url) && (
+      url && isYouTubeURL(url) && (
         <iframe
           src={`https://www.youtube.com/embed/${parseYouTubeVideoId(url)}`}
           title="YouTube video player"
@@ -28,6 +34,15 @@ try {
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           allowfullscreen
         />
+      )
+    }
+    {
+      video && (
+        <figure class='video'>
+          <video src={video} autoplay loop muted playsinline>
+            Your browser does not support the video tag.
+          </video>
+        </figure>
       )
     }
   </div>
@@ -46,5 +61,10 @@ try {
     .video div:first-child iframe {
       height: 220px;
     }
+  }
+  video {
+      display: block;
+      margin: 0 auto;
+      max-width: 100%;
   }
 </style>
