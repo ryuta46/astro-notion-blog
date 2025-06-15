@@ -257,12 +257,18 @@
       const parser = new DOMParser()
       const xml = parser.parseFromString(body, 'text/xml')
 
+      const currentPath = url.pathname
+      const langPrefix = currentPath.split('/')[1]
+
       Array.from(xml.getElementsByTagName('item')).forEach((item) => {
         const title = item.getElementsByTagName('title')[0].textContent
         const link = item.getElementsByTagName('link')[0].textContent
         const description =
           item.getElementsByTagName('description')[0]?.textContent
         const pubDate = item.getElementsByTagName('pubDate')[0].textContent
+
+        const relativeLink = new URL(link).pathname
+        if (!relativeLink.startsWith(`/${langPrefix}/`)) return;
 
         feedItems.push({
           title,
